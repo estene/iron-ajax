@@ -6,6 +6,8 @@ The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
 The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+
+Modified 2017 by IF Customer team to include support for bearer tokens.
 -->
 
 <link rel="import" href="../polymer/polymer.html">
@@ -75,6 +77,15 @@ element.
     },
 
     properties: {
+      /**
+       * The session storage key where the `iron-ajax-with-token` component
+       * can read the bearer token. Defaults to `wp_access_token`.
+       */
+       accessTokenKey: {
+        type: String,
+        value: 'wp_access_token'
+      },
+
       /**
        * The URL target of the request.
        */
@@ -418,6 +429,17 @@ element.
           headers[header] = this.headers[header].toString();
         }
       }
+
+      var key = this.get('accessTokenKey');
+      if (!key || key.length === 0) {
+        throw new Exception('No accessTokenKey provided.');
+      }
+      var accessToken = window.sessionStorage[key];
+      if (!accessToken || accessToken.length === 0) {
+        throw new Exception('No bearer token found.');
+      }
+
+      headers['Authorization'] = 'Bearer ' + accessToken;
 
       return headers;
     },
